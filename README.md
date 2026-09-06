@@ -129,21 +129,33 @@ src/
 - WebGPUが使える環境では自動的にWebGPUを使用し、失敗時はWASMに自動フォールバック(SAM/CLIP双方)
 - 画像はReactのref(`ImageBitmap`)としてのみ保持し、新しい画像読込時や離脱時に明示的に`close()`して解放
 
+### テスト(Vitest)
+
+ONNX推論やCanvas/OffscreenCanvasに依存しない、決定的なロジックをユニットテストの対象にしている。
+
+- `src/lib/quiz.test.ts` — CLIP分類結果→クイズ選択肢への変換(語彙マッチング、top3抽出、「それ以外」の付与、未知ラベルの無視)
+- `src/lib/device.test.ts` — WebGPU検出とWASMへのフォールバック(`navigator.gpu`の有無・`requestAdapter`の成功/null/例外の各パターン)
+- `src/lib/workerRpc.test.ts` — Web WorkerとのRPC層(`WorkerClient`のcall解決/reject/イベント配送、`createRpcServer`のハンドラ呼び出し・未知type・例外時のエラー応答)
+
+Workerそのもの(`samWorker.ts`/`clipWorker.ts`)やCanvas描画・React UIは、実モデルのダウンロードやOffscreenCanvasを要するためユニットテストの対象外とし、手動でのブラウザ動作確認に委ねている。
+
 ### 未実装・今後のTODO
 
 - Cloudflare Pagesへの実際のデプロイ設定(`wrangler.toml`等)
 - モデルファイルのHugging Face Hub CDN → Cloudflare R2への移行
 - 複数点クリックによるマスクの精緻化(現状はシングルクリックのみ)
 - Cloudflare D1への回答ログ保存・R2への画像永続化(要件上、将来拡張として計画中)
-- 自動テスト
+- Worker本体・UIコンポーネントのテスト(モデルダウンロードが絡むため現状は手動確認のみ)
 
 ## 開発方法
 
 ```bash
 npm install
-npm run dev      # 開発サーバー起動
-npm run build    # 型チェック + 本番ビルド
-npm run lint     # oxlintによる静的解析
+npm run dev        # 開発サーバー起動
+npm run build      # 型チェック + 本番ビルド
+npm run lint       # oxlintによる静的解析
+npm run test       # Vitestでユニットテストを実行
+npm run test:watch # Vitestをwatchモードで実行
 ```
 
 初回起動時、ブラウザがHugging Face Hubから合計100〜150MB程度のモデルファイルをダウンロードするため、初回のみ読み込みに時間がかかる(2回目以降はブラウザキャッシュから読み込まれる)。
