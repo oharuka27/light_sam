@@ -41,6 +41,13 @@ function padBbox(bbox: Bbox, imgWidth: number, imgHeight: number, ratio: number)
   return { x, y, width, height }
 }
 
+// Reactの状態更新後、クリック点だけの状態が実際に画面へ描画されるまで待つ。
+function waitForPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  })
+}
+
 function App() {
   const samRef = useRef<SamClient | null>(null)
   const clipRef = useRef<ClipClient | null>(null)
@@ -84,7 +91,12 @@ function App() {
   }, [])
 
   const busy =
-    stage === 'loading-models' || stage === 'encoding-image' || stage === 'decoding-mask' || stage === 'classifying'
+    stage === 'loading-models' ||
+    stage === 'encoding-image' ||
+    stage === 'marking-point' ||
+    stage === 'decoding-mask' ||
+    stage === 'classifying'
+  const showLoading = busy && stage !== 'marking-point'
 
   const modelProgressValues = [samProgress?.progress, clipProgress?.progress].filter(
     (value): value is number => value != null,
@@ -161,7 +173,12 @@ function App() {
     setQuiz(null)
     setSelectedChoiceId(null)
     setError(null)
+    setStage('marking-point')
+
+    // 先にクリック点を表示し、その描画後にプログレス表示と推論を開始する。
+    await waitForPaint()
     setStage('decoding-mask')
+    await waitForPaint()
 
     try {
       const maskResult = await sam.decodePoint(clicked.x, clicked.y)
@@ -224,7 +241,11 @@ function App() {
         </div>
       )}
 
-      <LoadingOverlay visible={busy} message={loadingMessage} progress={stage === 'loading-models' ? modelProgress : null} />
+      <LoadingOverlay
+        visible={showLoading}
+        message={loadingMessage}
+        progress={stage === 'loading-models' ? modelProgress : null}
+      />
     </div>
   )
 }

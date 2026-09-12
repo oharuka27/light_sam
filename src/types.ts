@@ -24,6 +24,7 @@ export type PipelineStage =
   | 'loading-models'
   | 'encoding-image'
   | 'ready'
+  | 'marking-point'
   | 'decoding-mask'
   | 'classifying'
   | 'error'

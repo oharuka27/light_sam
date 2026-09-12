@@ -17,6 +17,23 @@ function getImagePlacement(bitmap: ImageBitmap) {
   }
 }
 
+function drawPointMarker(
+  ctx: CanvasRenderingContext2D,
+  placement: ReturnType<typeof getImagePlacement>,
+  point: Point,
+) {
+  const displayX = placement.x + point.x * placement.scale
+  const displayY = placement.y + point.y * placement.scale
+  const radius = 7
+  ctx.beginPath()
+  ctx.arc(displayX, displayY, radius, 0, Math.PI * 2)
+  ctx.fillStyle = '#f97316'
+  ctx.fill()
+  ctx.lineWidth = 3
+  ctx.strokeStyle = '#ffffff'
+  ctx.stroke()
+}
+
 interface Props {
   bitmap: ImageBitmap | null
   mask: MaskResult | null
@@ -65,16 +82,7 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
     }
 
     if (point) {
-      const displayX = placement.x + point.x * placement.scale
-      const displayY = placement.y + point.y * placement.scale
-      const radius = 7
-      ctx.beginPath()
-      ctx.arc(displayX, displayY, radius, 0, Math.PI * 2)
-      ctx.fillStyle = '#f97316'
-      ctx.fill()
-      ctx.lineWidth = 3
-      ctx.strokeStyle = '#ffffff'
-      ctx.stroke()
+      drawPointMarker(ctx, placement, point)
     }
   }, [bitmap, mask, point])
 
@@ -95,7 +103,13 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
     ) return
     const x = Math.min(bitmap.width - 1, Math.max(0, Math.round((canvasX - placement.x) / placement.scale)))
     const y = Math.min(bitmap.height - 1, Math.max(0, Math.round((canvasY - placement.y) / placement.scale)))
-    onClickPoint({ x, y })
+    const clickedPoint = { x, y }
+
+    // Reactの状態更新やCanvas全体の再描画を待たず、クリックイベント内で即座に反映する。
+    const ctx = canvas.getContext('2d')
+    if (ctx) drawPointMarker(ctx, placement, clickedPoint)
+
+    onClickPoint(clickedPoint)
   }
 
   return (
