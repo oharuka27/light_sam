@@ -73,6 +73,20 @@ function App() {
   const busy =
     stage === 'loading-models' || stage === 'encoding-image' || stage === 'decoding-mask' || stage === 'classifying'
 
+  const modelProgressValues = [samProgress?.progress, clipProgress?.progress].filter(
+    (value): value is number => value != null,
+  )
+  const modelProgress =
+    modelProgressValues.length === 2
+      ? modelProgressValues.reduce((sum, value) => sum + value, 0) / modelProgressValues.length
+      : null
+  const loadingMessage =
+    stage === 'loading-models'
+      ? 'データ読み込み中…'
+      : stage === 'encoding-image'
+        ? '読み込み中…'
+        : 'AI処理中…'
+
   const handleSelectFile = useCallback(async (file: File) => {
     const sam = samRef.current
     if (!sam) return
@@ -167,7 +181,7 @@ function App() {
         </div>
       )}
 
-      <LoadingOverlay visible={stage === 'loading-models'} sam={samProgress} clip={clipProgress} />
+      <LoadingOverlay visible={busy} message={loadingMessage} progress={stage === 'loading-models' ? modelProgress : null} />
     </div>
   )
 }

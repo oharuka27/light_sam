@@ -1,34 +1,30 @@
-import type { ModelLoadProgress } from '../types'
-
 interface Props {
   visible: boolean
-  sam: ModelLoadProgress | null
-  clip: ModelLoadProgress | null
+  message: string
+  progress?: number | null
 }
 
-export function LoadingOverlay({ visible, sam, clip }: Props) {
+export function LoadingOverlay({ visible, message, progress = null }: Props) {
   if (!visible) return null
 
-  return (
-    <div className="loading-overlay">
-      <div className="loading-card">
-        <p>モデルを読み込み中です(初回のみ、数十MB〜のダウンロードが発生します)</p>
-        <ProgressLine label="SAM(領域切り出し)" info={sam} />
-        <ProgressLine label="CLIP(分類)" info={clip} />
-      </div>
-    </div>
-  )
-}
+  const percentage = progress == null ? null : Math.max(0, Math.min(100, Math.round(progress)))
 
-function ProgressLine({ label, info }: { label: string; info: ModelLoadProgress | null }) {
-  const pct = info?.progress != null ? Math.round(info.progress) : null
   return (
-    <div className="loading-line">
-      <span>{label}</span>
-      <span>
-        {info?.status ?? '待機中'}
-        {pct != null ? ` (${pct}%)` : ''}
-      </span>
+    <div className="loading-overlay" role="status" aria-live="polite" aria-busy="true">
+      <div className="loading-card" aria-label={message}>
+        <p>{message}</p>
+        <div
+          className={`loading-progress${percentage == null ? ' loading-progress--indeterminate' : ''}`}
+          role="progressbar"
+          aria-label={message}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percentage ?? undefined}
+        >
+          <span style={percentage == null ? undefined : { width: `${percentage}%` }} />
+        </div>
+        {percentage != null && <span className="loading-percentage">{percentage}%</span>}
+      </div>
     </div>
   )
 }
