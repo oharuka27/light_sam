@@ -1,6 +1,22 @@
 import { useEffect, useRef, type MouseEvent } from 'react'
 import type { MaskResult, Point } from '../types'
 
+const STAGE_WIDTH = 960
+const STAGE_HEIGHT = 600
+
+function getImagePlacement(bitmap: ImageBitmap) {
+  const scale = Math.min(STAGE_WIDTH / bitmap.width, STAGE_HEIGHT / bitmap.height)
+  const width = bitmap.width * scale
+  const height = bitmap.height * scale
+  return {
+    scale,
+    x: (STAGE_WIDTH - width) / 2,
+    y: (STAGE_HEIGHT - height) / 2,
+    width,
+    height,
+  }
+}
+
 interface Props {
   bitmap: ImageBitmap | null
   mask: MaskResult | null
@@ -16,16 +32,19 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
     const canvas = canvasRef.current
     if (!canvas || !bitmap) return
 
-    canvas.width = bitmap.width
-    canvas.height = bitmap.height
+    canvas.width = STAGE_WIDTH
+    canvas.height = STAGE_HEIGHT
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(bitmap, 0, 0)
+    ctx.fillStyle = '#fff7ed'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    const placement = getImagePlacement(bitmap)
+    ctx.drawImage(bitmap, placement.x, placement.y, placement.width, placement.height)
 
-    if (mask && mask.width === canvas.width && mask.height === canvas.height) {
-      const overlayData = ctx.createImageData(canvas.width, canvas.height)
+    if (mask && mask.width === bitmap.width && mask.height === bitmap.height) {
+      const overlayData = ctx.createImageData(mask.width, mask.height)
       for (let i = 0; i < mask.data.length; i++) {
         if (mask.data[i] > 0) {
           const o = i * 4
@@ -37,21 +56,23 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
       }
       // putImageDataは既存ピクセルと合成できないため、一旦別canvasに描いてから
       // drawImageで重ねることでアルファ合成する
-      const overlayCanvas = new OffscreenCanvas(canvas.width, canvas.height)
+      const overlayCanvas = new OffscreenCanvas(mask.width, mask.height)
       const octx = overlayCanvas.getContext('2d')
       if (octx) {
         octx.putImageData(overlayData, 0, 0)
-        ctx.drawImage(overlayCanvas, 0, 0)
+        ctx.drawImage(overlayCanvas, placement.x, placement.y, placement.width, placement.height)
       }
     }
 
     if (point) {
-      const radius = Math.max(4, canvas.width * 0.006)
+      const displayX = placement.x + point.x * placement.scale
+      const displayY = placement.y + point.y * placement.scale
+      const radius = 7
       ctx.beginPath()
-      ctx.arc(point.x, point.y, radius, 0, Math.PI * 2)
+      ctx.arc(displayX, displayY, radius, 0, Math.PI * 2)
       ctx.fillStyle = '#f97316'
       ctx.fill()
-      ctx.lineWidth = Math.max(1.5, canvas.width * 0.0015)
+      ctx.lineWidth = 3
       ctx.strokeStyle = '#ffffff'
       ctx.stroke()
     }
@@ -62,10 +83,18 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
     const canvas = canvasRef.current
     if (!canvas || canvas.width === 0) return
     const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    const x = Math.round((e.clientX - rect.left) * scaleX)
-    const y = Math.round((e.clientY - rect.top) * scaleY)
+    if (!bitmap) return
+    const canvasX = (e.clientX - rect.left) * (canvas.width / rect.width)
+    const canvasY = (e.clientY - rect.top) * (canvas.height / rect.height)
+    const placement = getImagePlacement(bitmap)
+    if (
+      canvasX < placement.x ||
+      canvasX > placement.x + placement.width ||
+      canvasY < placement.y ||
+      canvasY > placement.y + placement.height
+    ) return
+    const x = Math.min(bitmap.width - 1, Math.max(0, Math.round((canvasX - placement.x) / placement.scale)))
+    const y = Math.min(bitmap.height - 1, Math.max(0, Math.round((canvasY - placement.y) / placement.scale)))
     onClickPoint({ x, y })
   }
 
@@ -73,6 +102,7 @@ export function CanvasStage({ bitmap, mask, point, disabled, onClickPoint }: Pro
     <canvas
       ref={canvasRef}
       onClick={handleClick}
+      aria-label="物体を選択する画像"
       className={`canvas-stage${disabled ? ' canvas-stage--disabled' : ''}`}
     />
   )

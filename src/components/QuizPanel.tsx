@@ -31,7 +31,13 @@ export function QuizPanel({ choices, top, selectedId, onSelect, onReset }: Props
               onClick={() => onSelect(choice.id)}
               className={classes.join(' ')}
             >
-              {choice.labelJa}
+              <span className="quiz-choice__label">{choice.labelJa}</span>
+              {answered && (isSelected || isAiTop) && (
+                <span className="quiz-choice__badges">
+                  {isSelected && <span className="choice-badge choice-badge--user">あなた</span>}
+                  {isAiTop && <span className="choice-badge choice-badge--ai">AI</span>}
+                </span>
+              )}
             </button>
           )
         })}
