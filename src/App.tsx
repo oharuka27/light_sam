@@ -221,7 +221,7 @@ function App() {
       <aside className="app-note" aria-label="AIの回答精度について">
         <span aria-hidden="true">💡</span>
         <p>
-          このアプリでは、回答精度よりも反応速度を優先した軽量AIモデルを使用しています。<br />
+          このアプリでは、回答精度よりも反応速度を優先した軽量AIモデルを使用しています。
           AIの回答は必ずしも正確ではありません。
         </p>
       </aside>
