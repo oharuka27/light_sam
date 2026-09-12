@@ -9,6 +9,7 @@
 
 .app-header {
   position: relative;
+  width: 100%;
 }
 
 .app-kicker {
@@ -25,7 +26,10 @@
 
 .app-header h1 {
   margin: 0 0 8px;
+  font-size: clamp(32px, 7vw, 56px);
+  line-height: 1.2;
   font-weight: 900;
+  overflow-wrap: anywhere;
   background: linear-gradient(90deg, #7c3aed, #ec4899, #f59e0b);
   background-clip: text;
   -webkit-background-clip: text;

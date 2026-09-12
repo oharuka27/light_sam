@@ -138,7 +138,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-kicker">AIといっしょに当ててみよう！</div>
-        <h1><span aria-hidden="true">✨</span> Light SAM 物体クイズ</h1>
+        <h1><span aria-hidden="true">✨</span> 物体あてクイズ</h1>
         <p>画像を選んで、気になる場所をクリックしてみてください。</p>
       </header>
 
