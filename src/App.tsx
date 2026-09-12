@@ -9,8 +9,20 @@ import { ClipClient } from './lib/clipClient'
 import { buildQuizChoices, type QuizResult } from './lib/quiz'
 import { VOCABULARY } from './data/vocabulary'
 import type { MaskResult, ModelLoadProgress, PipelineStage, Point } from './types'
+import sample1 from '../sample/gecko.jpg'
+import sample2 from '../sample/sturgeon.jpg'
+import sample3 from '../sample/bear.jpg'
+import sample4 from '../sample/hamster.jpg'
+import sample5 from '../sample/crocodile.jpg'
 
 const CANDIDATE_LABELS = VOCABULARY.map((v) => v.labelEn)
+const PRESET_IMAGES = [
+  { id: 'sample-1', label: '画像1', url: sample1 },
+  { id: 'sample-2', label: '画像2', url: sample2 },
+  { id: 'sample-3', label: '画像3', url: sample3 },
+  { id: 'sample-4', label: '画像4', url: sample4 },
+  { id: 'sample-5', label: '画像5', url: sample5 },
+]
 
 interface Bbox {
   x: number
@@ -44,6 +56,7 @@ function App() {
   const [mask, setMask] = useState<MaskResult | null>(null)
   const [quiz, setQuiz] = useState<QuizResult | null>(null)
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null)
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null)
 
   useEffect(() => {
     const sam = new SamClient()
@@ -87,7 +100,7 @@ function App() {
         ? '読み込み中…'
         : 'AI処理中…'
 
-  const handleSelectFile = useCallback(async (file: File) => {
+  const loadImage = useCallback(async (image: Blob) => {
     const sam = samRef.current
     if (!sam) return
 
@@ -99,7 +112,7 @@ function App() {
     setStage('encoding-image')
 
     try {
-      const [displayBitmap, workerBitmap] = await Promise.all([createImageBitmap(file), createImageBitmap(file)])
+      const [displayBitmap, workerBitmap] = await Promise.all([createImageBitmap(image), createImageBitmap(image)])
 
       bitmapRef.current?.close()
       bitmapRef.current = displayBitmap
@@ -112,6 +125,30 @@ function App() {
       setStage('error')
     }
   }, [])
+
+  const handleSelectFile = useCallback(
+    (file: File) => {
+      setSelectedImageId(null)
+      void loadImage(file)
+    },
+    [loadImage],
+  )
+
+  const handleSelectPreset = useCallback(
+    async (id: string, url: string) => {
+      setSelectedImageId(id)
+      setStage('encoding-image')
+      try {
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('サンプル画像を読み込めませんでした')
+        await loadImage(await response.blob())
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+        setStage('error')
+      }
+    },
+    [loadImage],
+  )
 
   const handleClickPoint = useCallback(async (clicked: Point) => {
     const sam = samRef.current
@@ -156,7 +193,13 @@ function App() {
         <p>画像を選んで、気になる場所をクリックしてみてください。</p>
       </header>
 
-      <ImageUploader onSelect={handleSelectFile} disabled={busy} />
+      <ImageUploader
+        presets={PRESET_IMAGES}
+        selectedPresetId={selectedImageId}
+        onSelectPreset={handleSelectPreset}
+        onSelectFile={handleSelectFile}
+        disabled={busy}
+      />
 
       {error && <p className="app-error">エラー: {error}</p>}
 
