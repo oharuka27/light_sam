@@ -218,6 +218,14 @@ function App() {
         disabled={busy}
       />
 
+      <aside className="app-note" aria-label="AIの回答精度について">
+        <span aria-hidden="true">💡</span>
+        <p>
+          このアプリでは、回答精度よりも反応速度を優先した軽量AIモデルを使用しています。<br />
+          AIの回答は必ずしも正確ではありません。
+        </p>
+      </aside>
+
       {error && <p className="app-error">エラー: {error}</p>}
 
       {hasImage && (
