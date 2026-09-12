@@ -1,38 +1,40 @@
 # サンプル画像の出典とライセンス
 
-このフォルダの5枚は、Hugging Face の
-[`imageomics/rare-species`](https://huggingface.co/datasets/imageomics/rare-species)
-データセットに収録されている作品です。データセット付属の画像別ライセンス台帳
-（`metadata/licenses.csv`）で、各画像が `cc-publicdomain` / CC0 1.0 と記載されていることを
-2026-09-12に確認し、同台帳に記載された原典（Wikimedia Commons）から取得しました。
+確認日: 2026-09-12
 
-CC0 1.0では、著作権者が可能な限り著作権等を放棄しており、個人利用・改変・再配布が
-許可されています。クレジット表記は必須ではありませんが、来歴を追跡できるよう以下に
-記録します。CC0は商標・特許・肖像権など、第三者の権利まで保証するものではありません。
+## ユーザー提供画像
 
-ライセンス全文: https://creativecommons.org/publicdomain/zero/1.0/legalcode.en
+次の2枚は指定されたローカルファイルをリネームして格納しています。画像内容は変更して
+いません。外部配布物ではないため、このリポジトリではライセンス判定を行っていません。
 
-| ファイル | 元画像タイトル | 権利者・提供者（台帳記載） | データセット画像ID | 取得元URL |
+| ファイル | 元ファイル |
+|---|---|
+| `image1.png` | `スクリーンショット 2024-10-07 202611.png` |
+| `image2.png` | `スクリーンショット 2026-09-06 091725.png` |
+
+## 追加したフリー画像
+
+次の3枚はWikimedia Commonsから取得した街中の風景です。`image3.jpg` と
+`image4.jpg` はCC0 1.0、`image5.jpg` はパブリックドメインです。いずれも個人利用、
+改変、再配布が可能で、クレジット表記は必須ではありませんが、来歴を残すため記載します。
+
+| ファイル | 作品 | 作者 | ライセンス | 出典 |
 |---|---|---|---|---|
-| `gecko.jpg` | Phelsuma standingi 191909081.jpg | Marius Burger | `3387dc4a-4061-4151-ae68-b2fd9bf12d26` | https://upload.wikimedia.org/wikipedia/commons/c/c4/Phelsuma_standingi_191909081.jpg |
-| `sturgeon.jpg` | Pallid sturgeon - Garrison Dam ND.jpg | U.S. Fish and Wildlife Service | `92da1502-8952-4c25-b20c-a9e7108e4e09` | https://upload.wikimedia.org/wikipedia/commons/e/ea/Pallid_sturgeon_-_Garrison_Dam_ND.jpg |
-| `bear.jpg` | Tremarctos ornatus Zoo Rio04.jpg | Alberto Apollaro Teleuko | `516c8b78-d22b-41a5-a134-92111273a049` | https://upload.wikimedia.org/wikipedia/commons/9/97/Tremarctos_ornatus_Zoo_Rio04.jpg |
-| `hamster.jpg` | Muffin (Hamster) 1.JPG | Tb240904 | `dfe7d711-94d8-47f7-80c1-a3d76644502e` | https://upload.wikimedia.org/wikipedia/commons/f/f3/Muffin_%28Hamster%29_1.JPG |
-| `crocodile.jpg` | CubanCrocodile 001.jpg | Ltshears | `e9039515-0c78-4b92-aa60-317a1219d344` | https://upload.wikimedia.org/wikipedia/commons/8/8f/CubanCrocodile_001.jpg |
+| `image3.jpg` | Urban street.jpg | Hala Zayzafoun | CC0 1.0 | https://commons.wikimedia.org/wiki/File:Urban_street.jpg |
+| `image4.jpg` | Street scene with walkway and cars and buildings and trees.jpg | Tomwsulcer | CC0 1.0 | https://commons.wikimedia.org/wiki/File:Street_scene_with_walkway_and_cars_and_buildings_and_trees.jpg |
+| `image5.jpg` | Parked cars on street.jpg | Public Domain Images（作者不詳） | Public domain | https://commons.wikimedia.org/wiki/File:Parked_cars_on_street.jpg |
 
-## ファイル照合用MD5
+CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/legalcode.en
 
-今回取得したファイルの値です（原典ファイルは、データセット内で変換されたコピーと
-ハッシュが異なる場合があります）。
+## ファイル照合用SHA-256
 
 ```text
-18c1f4ae7532886e20f498f699edf39f  gecko.jpg
-c5cc10869a18276b9056ff5020896348  sturgeon.jpg
-3177ea98de0adc7e9a85b3d0d8641805  bear.jpg
-e38920c610db1b5cdbb512e5f486cba0  hamster.jpg
-9f0027fc206012a9adca4c6642abc035  crocodile.jpg
+8aaa97ca62c32d6dd0e78a1f87b2b8e129d8059c6a55a0abad98fdee28638890  image1.png
+47abe474b0bd65468d31c7f5a13451d304efcd662e0ba206f20a8a9872f7f744  image2.png
+af7a4cfd3a2c95b7f74840993e4c6121a5c25790a99a71580daf25baa6925d60  image3.jpg
+2073cc7e8a044ed284da24d0d44ec4cfa2af7857b658c68218e7bbcef3b0c863  image4.jpg
+696a1f7a6b683e68b47353f640cc9ca92701b347f6aff6baa63a0f5c660380ff  image5.jpg
 ```
 
-注意: Hugging Face上のデータセット「全体」はCC0と表示されていますが、収録画像には別の
-ライセンスも含まれます。このフォルダでは全体表示だけを根拠にせず、画像別台帳でCC0と
-確認できた5枚のみを選びました。
+注意: CC0やパブリックドメインの表示は著作権上の利用条件に関するものです。画像中の
+商標、人物、建物などに関する第三者の権利を保証するものではありません。

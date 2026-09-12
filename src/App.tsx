@@ -9,11 +9,11 @@ import { ClipClient } from './lib/clipClient'
 import { buildQuizChoices, type QuizResult } from './lib/quiz'
 import { VOCABULARY } from './data/vocabulary'
 import type { MaskResult, ModelLoadProgress, PipelineStage, Point } from './types'
-import sample1 from '../sample/gecko.jpg'
-import sample2 from '../sample/sturgeon.jpg'
-import sample3 from '../sample/bear.jpg'
-import sample4 from '../sample/hamster.jpg'
-import sample5 from '../sample/crocodile.jpg'
+import sample1 from '../sample/image1.png'
+import sample2 from '../sample/image2.png'
+import sample3 from '../sample/image3.jpg'
+import sample4 from '../sample/image4.jpg'
+import sample5 from '../sample/image5.jpg'
 
 const CANDIDATE_LABELS = VOCABULARY.map((v) => v.labelEn)
 const PRESET_IMAGES = [
