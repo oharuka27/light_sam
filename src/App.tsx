@@ -8,7 +8,7 @@ import { SamClient } from './lib/samClient'
 import { ClipClient } from './lib/clipClient'
 import { buildQuizChoices, type QuizResult } from './lib/quiz'
 import { VOCABULARY } from './data/vocabulary'
-import type { MaskResult, ModelLoadProgress, PipelineStage, Point } from './types'
+import type { MaskResult, PipelineStage, Point } from './types'
 import sample1 from '../sample/image1.png'
 import sample2 from '../sample/image2.png'
 import sample3 from '../sample/image3.jpg'
@@ -54,8 +54,6 @@ function App() {
   const bitmapRef = useRef<ImageBitmap | null>(null)
 
   const [stage, setStage] = useState<PipelineStage>('loading-models')
-  const [samProgress, setSamProgress] = useState<ModelLoadProgress | null>(null)
-  const [clipProgress, setClipProgress] = useState<ModelLoadProgress | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [hasImage, setHasImage] = useState(false)
@@ -71,9 +69,6 @@ function App() {
     samRef.current = sam
     clipRef.current = clip
 
-    const offSam = sam.onProgress(setSamProgress)
-    const offClip = clip.onProgress(setClipProgress)
-
     Promise.all([sam.loadModel(), clip.loadModel()])
       .then(() => setStage((s) => (s === 'loading-models' ? 'idle' : s)))
       .catch((err) => {
@@ -82,8 +77,6 @@ function App() {
       })
 
     return () => {
-      offSam()
-      offClip()
       sam.terminate()
       clip.terminate()
       bitmapRef.current?.close()
@@ -98,18 +91,11 @@ function App() {
     stage === 'classifying'
   const showLoading = busy && stage !== 'marking-point'
 
-  const modelProgressValues = [samProgress?.progress, clipProgress?.progress].filter(
-    (value): value is number => value != null,
-  )
-  const modelProgress =
-    modelProgressValues.length === 2
-      ? modelProgressValues.reduce((sum, value) => sum + value, 0) / modelProgressValues.length
-      : null
   const loadingMessage =
     stage === 'loading-models'
-      ? 'データ読み込み中…'
+      ? 'AIモデルを読み込み中…'
       : stage === 'encoding-image'
-        ? '読み込み中…'
+        ? '画像を読み込み中…'
         : 'AI処理中…'
 
   const loadImage = useCallback(async (image: Blob) => {
@@ -252,7 +238,6 @@ function App() {
       <LoadingOverlay
         visible={showLoading}
         message={loadingMessage}
-        progress={stage === 'loading-models' ? modelProgress : null}
       />
     </div>
   )
