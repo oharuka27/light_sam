@@ -4,8 +4,7 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pagesではリポジトリ名のサブパス配下で配信される。
-  base: '/light_sam/',
+  base: '/',
   plugins: [react()],
   worker: {
     format: 'es',
