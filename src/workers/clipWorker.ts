@@ -2,6 +2,7 @@
 import { pipeline } from '@huggingface/transformers'
 import { createRpcServer, emitEvent } from '../lib/workerRpc'
 import { pickDevice } from '../lib/device'
+import './modelEnvironment'
 
 const MODEL_ID = 'Xenova/clip-vit-base-patch32'
 const HYPOTHESIS_TEMPLATE = 'This is a photo of {}'

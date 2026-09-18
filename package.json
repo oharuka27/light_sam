@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "deploy": "npm run build && wrangler deploy",
     "lint": "oxlint",
+    "models:download": "node scripts/download-models.mjs",
+    "models:upload": "node scripts/upload-models.mjs",
     "preview": "vite preview",
     "preview:worker": "npm run build && wrangler dev",
     "test": "vitest run",

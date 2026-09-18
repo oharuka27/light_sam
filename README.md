@@ -45,7 +45,7 @@
                  │ 初回アクセス時のみモデルファイル取得(以後キャッシュ)
                  ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│  モデル配信: Hugging Face Hub CDN(現状) / 将来Cloudflare R2へ移行可  │
+│  モデル配信: 非公開Cloudflare R2 → Workerの /models/* 経由           │
 │  - SAM: Xenova/slimsam-77-uniform (vision_encoder / mask_decoder)   │
 │  - CLIP: Xenova/clip-vit-base-patch32 (zero-shot-image-classification)│
 │  いずれもdtype=q8(int8量子化)でロードしダウンロード量を抑える        │
@@ -53,7 +53,7 @@
 
 【将来拡張(未実装・設計だけ留意)】
 ┌────────────────────┐   ┌──────────────┐   ┌───────────────┐
-│ Pages Functions(API) │──▶│ D1 (回答ログ) │   │ R2 (画像/クロップ)│
+│ Worker API           │──▶│ D1 (回答ログ) │   │ R2 (画像/クロップ)│
 └────────────────────┘   └──────────────┘   └───────────────┘
 ```
 
@@ -139,10 +139,39 @@ ONNX推論やCanvas/OffscreenCanvasに依存しない、決定的なロジック
 
 Workerそのもの(`samWorker.ts`/`clipWorker.ts`)やCanvas描画・React UIは、実モデルのダウンロードやOffscreenCanvasを要するためユニットテストの対象外とし、手動でのブラウザ動作確認に委ねている。
 
+## Cloudflare Workers / R2へのデプロイ
+
+AIモデルはWorkers Static Assetsの1ファイル上限を超えるため、`light-sam-models` R2バケットに保存する。
+バケットは公開せず、Workerが同一オリジンの`/models/*`として読み出す。CORS設定やR2カスタムドメインは不要。
+
+初回のみ、アプリをデプロイする前にCloudflare DashboardのR2画面で次のバケットを作成する。
+
+```text
+light-sam-models
+```
+
+続いてローカル環境からモデルを取得し、R2へアップロードする。
+
+```bash
+npx wrangler login
+npm run models:download
+npm run models:upload
+```
+
+`.models/`には約170MB以上のファイルが保存されるが、Git管理対象外。`models:upload`は
+`wrangler r2 object put --remote`を使い、モデルと設定ファイルを非公開R2へアップロードする。
+
+R2へのアップロード後、通常どおりデプロイする。
+
+```bash
+npm run deploy
+```
+
+CloudflareのGit連携を利用する場合も、先にR2バケット作成とモデルアップロードを完了させてから変更をpushする。
+`wrangler.jsonc`の`MODELS`バインディングはデプロイ時に自動設定されるため、DashboardでWorkerのバインディングを手動追加する必要はない。
+
 ### 未実装・今後のTODO
 
-- Cloudflare Pagesへの実際のデプロイ設定(`wrangler.toml`等)
-- モデルファイルのHugging Face Hub CDN → Cloudflare R2への移行
 - 複数点クリックによるマスクの精緻化(現状はシングルクリックのみ)
 - Cloudflare D1への回答ログ保存・R2への画像永続化(要件上、将来拡張として計画中)
 - Worker本体・UIコンポーネントのテスト(モデルダウンロードが絡むため現状は手動確認のみ)
@@ -156,9 +185,11 @@ npm run build      # 型チェック + 本番ビルド
 npm run lint       # oxlintによる静的解析
 npm run test       # Vitestでユニットテストを実行
 npm run test:watch # Vitestをwatchモードで実行
+npm run models:download # Hugging Faceから必要なモデルを.models/へ取得
+npm run models:upload   # .models/のモデルをCloudflare R2へアップロード
 ```
 
-初回起動時、ブラウザがHugging Face Hubから合計100〜150MB程度のモデルファイルをダウンロードするため、初回のみ読み込みに時間がかかる(2回目以降はブラウザキャッシュから読み込まれる)。
+初回起動時、ブラウザがCloudflare R2から合計100〜200MB程度のモデルファイルをダウンロードするため、初回のみ読み込みに時間がかかる(2回目以降はブラウザキャッシュから読み込まれる)。
 
 ---
 

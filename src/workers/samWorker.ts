@@ -2,6 +2,7 @@
 import { SamModel, AutoProcessor, RawImage, type Tensor } from '@huggingface/transformers'
 import { createRpcServer, emitEvent } from '../lib/workerRpc'
 import { pickDevice } from '../lib/device'
+import './modelEnvironment'
 
 const MODEL_ID = 'Xenova/slimsam-77-uniform'
 

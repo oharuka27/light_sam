@@ -2,8 +2,17 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "light-sam",
   "compatibility_date": "2026-09-18",
+  "main": "./src/cloudflare/worker.ts",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
-  }
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    "run_worker_first": ["/models/*"]
+  },
+  "r2_buckets": [
+    {
+      "binding": "MODELS",
+      "bucket_name": "light-sam-models"
+    }
+  ]
 }
