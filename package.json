@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
+    "@huggingface/transformers": "4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
